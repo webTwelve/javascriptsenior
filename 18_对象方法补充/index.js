@@ -30,3 +30,9 @@ Student.prototype = Object.create(Person.prototype);
 let stu = new Student();
 // console.log(stu instanceof Person, "===");
 console.log(stu, "===");
+let obj = {
+  age: 18,
+  name: "FDF",
+};
+let p2 = Object.create(obj);
+console.log(obj.isPrototypeOf(p2), "----");
