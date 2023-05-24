@@ -3,11 +3,6 @@ let obj = reactive({
   age: 18,
 });
 let activedDependFn = null;
-function watchFn(fn) {
-  activedDependFn = fn;
-  fn();
-  activedDependFn = null;
-}
 class Depend {
   constructor() {
     this.dependFns = [];
@@ -17,9 +12,9 @@ class Depend {
       this.dependFns.push(activedDependFn);
     }
   }
-  notify() {
+  notify(now, old) {
     this.dependFns.forEach((item) => {
-      item();
+      item(now, old);
     });
   }
 }
@@ -46,20 +41,23 @@ function reactive(obj) {
       return Reflect.get(target, key, receiver);
     },
     set(target, key, value, receiver) {
+      let oldValue = target[key];
       Reflect.set(target, key, value, receiver);
       const depend = getDepend(target, key);
-      depend.notify();
+      depend.notify(value, oldValue);
     },
   });
 }
 
-watchFn(() => {
-  console.log(obj.name);
-});
-watchFn(() => {
-  console.log(obj.name);
-  console.log(obj.age);
-});
-console.log("+++++++++++++++++++");
+function watch(source, watchCallback) {
+  activedDependFn = watchCallback;
+  source();
+  activedDependFn = null;
+}
+watch(
+  () => obj.name,
+  (newVal, oldVal) => {
+    console.log(newVal, oldVal, "==watch侦听");
+  }
+);
 obj.name = "bb";
-obj.age = 18;
